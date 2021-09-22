@@ -1,0 +1,19 @@
+pipeline {
+  agent {
+    label 'master'
+  }
+  stages {
+    stage('deploy') {
+        steps {
+            withKubeConfig([
+                credentialsId: '12345678',
+                serverUrl: 'https://172.16.173.130:6443',
+                contextName: 'kubernetes-admin'
+            ]) {
+                sh 'chmod +x ci3.sh'
+                sh './ci3.sh'
+            }
+        }
+    }
+  }
+}

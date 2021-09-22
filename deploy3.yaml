@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-configmap
+  name: nginx-configmap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-configmap
+  template:
+    metadata:
+      labels:
+        app: nginx-configmap
+    spec:
+      containers:
+        - image: nginx:stable-alpine
+          name: nginx-stable-alpine
+          resources: { }
+          volumeMounts:
+            - name: 'nginx-config'
+              mountPath: '/etc/nginx/conf.d'
+            - name: 'nginx-html'
+              mountPath: '/usr/share/nginx/html'
+      volumes:
+        - name: nginx-html
+          configMap:
+            name: nginx-html
+        - name: nginx-config
+          configMap:
+            name: nginx-config
+status: { }
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx-svc-config
+  name: nginx-svc-config
+spec:
+  ports:
+    - nodePort: 31256
+      port: 8078
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: nginx-configmap
+  type: NodePort
+
+---
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: k8s.nginx-config.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: nginx-svc-config
+              servicePort: 8078
