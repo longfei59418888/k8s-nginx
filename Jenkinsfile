@@ -1,37 +1,16 @@
 pipeline {
   agent {
-    label 'master'
+      docker {
+        image 'spiritling/node:10.15.3'
+      }
+  }
+  environment {
+     VERSION = sh(script: 'node test.js', , returnStdout: true)
   }
   stages {
     stage('Test') {
         steps{
-          sh 'chmod +x ci.sh'
-          sh './ci.sh test'
+            sh 'echo "VERSION: "$VERSION'
         }
     }
-    stage('Build') {
-        steps{
-            sh 'chmod +x ci.sh'
-            sh './ci.sh build'
-        }
-    }
-    stage('Approve of Deploy UAT') {
-        steps {
-            input message: 'deploy?'
-        }
-    }
-
-    stage('deploy') {
-        steps {
-            withKubeConfig([
-                credentialsId: '12345678',
-                serverUrl: 'https://172.16.173.130:6443',
-                contextName: 'kubernetes-admin'
-            ]) {
-                sh 'chmod +x ci.sh'
-                sh './ci.sh deploy'
-            }
-        }
-    }
-  }
 }
