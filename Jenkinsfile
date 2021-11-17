@@ -13,4 +13,5 @@ pipeline {
             sh 'echo "VERSION: "$VERSION'
         }
     }
+  }
 }
