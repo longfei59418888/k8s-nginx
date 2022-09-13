@@ -1,9 +1,10 @@
 pipeline {
-  agent {
-    label 'master'
-  }
+   agent none
   stages {
     stage('Test') {
+        agent {
+          label 'docker-slave'
+        }
         steps{
           sh 'echo test'
 //           sh './ci.sh test'
